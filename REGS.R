@@ -31,33 +31,33 @@ FNMA[, OPTION.LAG4:=c(NA, OPTION.LAG3[-.N]), by=LOAN_ID]
 FNMA[, OPTION.LAG5:=c(NA, OPTION.LAG4[-.N]), by=LOAN_ID]
 FNMA[, OPTION.LAG6:=c(NA, OPTION.LAG5[-.N]), by=LOAN_ID]
 
-#FNMA<- na.omit(FNMA)
-lag1<-coxph(Surv(START,STOP,PREPAID)~OPTION, data=FNMA)
-lag2<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG1, data=FNMA)
-lag3<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG2, data=FNMA)
-lag4<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG3, data=FNMA)
-lag5<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG4, data=FNMA)
-lag6<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG5, data=FNMA)
-lag7<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG6, data=FNMA)
+FNMA<- na.omit(FNMA)
+
+##
+option<-coxph(Surv(START,STOP,PREPAID)~OPTION+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
+option1<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG1+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
+option2<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG2+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
+option3<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG3+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
+option4<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG4+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
+option5<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG5+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
+option6<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG6+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
 
 
-summary(lag1)
-summary(lag2)
-summary(lag3)
-summary(lag4)
-summary(lag5)
-summary(lag6)
-summary(lag7)
 
-extractAIC(lag1)
-extractAIC(lag2)
-extractAIC(lag3)
-extractAIC(lag3)
-extractAIC(lag4)
-extractAIC(lag5)
-extractAIC(lag6)
-extractAIC(lag7)
+summary(option)#not significant
+summary(option1)# p 0.0095, beta= 0.063553, AIC=387249
+summary(option2)# p 0.0017, beta= 0.0767, AIC= 387251 <--- fits best stastisscally and economically
+summary(option3)#p. 0.0048, beta= 0.069, AIC= 387257
+summary(option4)#not significant
+summary(option5)#not significant
+summary(option6)#not significant
 
+extractAIC(option1)
+extractAIC(option2)
+extractAIC(option3)
+extractAIC(option4)
+extractAIC(option5)
+extractAIC(option6)
 
 
 ## lagged cat
@@ -83,37 +83,6 @@ FNMA <- within(FNMA, OPTIONCAT.LAG6 <- relevel(OPTIONCAT.LAG6, ref = 2))
 ##gg barplot
 
 #relevel baseline to FNMA OPTIONCAT 
-
-
-
-
-
-
-##
-option<-coxph(Surv(START,STOP,PREPAID)~OPTION+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
-option1<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG1+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
-option2<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG2+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
-option3<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG3+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
-option4<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG4+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
-option5<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG5+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
-option6<-coxph(Surv(START,STOP,PREPAID)~OPTION.LAG6+REGION+DTI+CSCORE+OLTV+UNEMP+PROP_TYP+OCC_STAT+SEASON+SHILLER+Loan.Age, data=FNMA)
-
-
-
-summary(option)#not significant
-summary(option1)# p 0.0095, beta= 0.063553, AIC=387249
-summary(option2)# p 0.0017, beta= 0.0767, AIC= 387251 <--- fits best stastisscally and economically
-summary(option3)#p. 0.0048, beta= 0.069, AIC= 387257
-summary(option4)#not significant
-summary(option5)#not significant
-summary(option6)#not significant
-
-extractAIC(option)
-extractAIC(option2)
-extractAIC(option3)
-extractAIC(option4)
-extractAIC(option5)
-extractAIC(option6)
 
 
 
