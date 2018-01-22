@@ -1,35 +1,19 @@
-if (!(require(survminer))) install.packages ("survminer")
-if (!(require(survival))) install.packages ("survival")
-if (!(require(stargazer))) install.packages ("stargazer")
-if (!(require(dplyr))) install.packages ("dplyr")
-if (!(require(data.table))) install.packages ("data.table")
-if (!(require(ggplot2))) install.packages ("ggplot2")
 
-
-gc()
-
-
-options(scipen=999)
-options(digits=5)
 #options(contrasts = c("contr.treatment", "contr.treatment"))
 
 
 load("C:/Users/Kons/OneDrive/MASTERARBEIT/DATA/PREPAYMENTSURV/FNMA.Rda")
 
-FNMA$OPTION.CAT <- cut(FNMA$OPTION.LAG1, breaks=c(-Inf,0,0.75, Inf), labels=c("OTM","ATM","ITM"))
-FNMA <- within(FNMA, OPTION.CAT <- relevel(OPTION.CAT, ref = 2))
 FNMA$OPTION.BI <- cut(FNMA$OPTION.LAG1, breaks=c(-Inf,0.5, Inf), labels=c("OTM","ITM"))
-
-
 FNMA$LTV <- (FNMA$LAST_UPB/FNMA$HOUSEPRICE.DEV)*100
-FNMA$LTV.CAT <- cut(FNMA$LTV, breaks=c(-Inf,65,80, Inf), labels=c("1","2","3"))
+FNMA$LTV.CAT <- cut(FNMA$LTV, breaks=c(-Inf,65,80, Inf), labels=c("<65","65-80",">80"))
 FNMA <- within(FNMA, LTV.CAT <- relevel(LTV.CAT, ref = 2))
-FNMA <- na.omit(FNMA)
-
-
-FNMA$CSCORE.CAT <- cut(FNMA$CSCORE, breaks=c(-Inf,750, Inf), labels=c("1","2"))
 FNMA$OCC_STAT[FNMA$OCC_STAT=="S"]<- "P"
-
+FNMA$OCC_STAT <- factor(FNMA$OCC_STAT)
+FNMA <- within(FNMA, OCC_STAT <- relevel(OCC_STAT, ref = 2))
+FNMA$VOL.CAT <- cut(FNMA$ORIG_AMT, breaks=c(-Inf,150000,300000, Inf), labels=c("<150,000$","150,000$-300,000$",">300,000$"))
+FNMA <- within(FNMA, VOL.CAT <- relevel(VOL.CAT, ref = 1))
+FNMA <- na.omit(FNMA)
 
 
 ## Kaplan-Meier estimates ##

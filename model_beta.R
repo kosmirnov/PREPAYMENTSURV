@@ -5,7 +5,6 @@ if (!(require(dplyr))) install.packages ("dplyr")
 if (!(require(data.table))) install.packages ("data.table")
 if (!(require(ggplot2))) install.packages ("ggplot2")
 
-
 gc()
 
 
@@ -25,7 +24,7 @@ FNMA <- within(FNMA, LTV.CAT <- relevel(LTV.CAT, ref = 2))
 FNMA$DTI.CAT <- cut(FNMA$LTV, breaks=c(-Inf,40, Inf), labels=c("<40",">=40"))
 
 FNMA$VOL.CAT <- cut(FNMA$ORIG_AMT, breaks=c(-Inf,150000,300000, Inf), labels=c("<150,000$","150,000$-300,000$",">300,000$"))
-FNMA <- within(FNMA, VOL.CAT <- relevel(VOL.CAT, ref = 2))
+FNMA <- within(FNMA, VOL.CAT <- relevel(VOL.CAT, ref = 1))
 
 FNMA$CSCORE.CAT <- cut(FNMA$CSCORE, breaks=c(-Inf,775, Inf), labels=c("<775",">775"))
 
@@ -40,8 +39,30 @@ FINAL_cont<-coxph(Surv(START,STOP,PREPAID)~OPTION+CSCORE+LTV+OCC_STAT+DTI+VOL.CA
 summary(FINAL_cont)
 zph_cont <- cox.zph(FINAL_cont)
 zph_cont
+ggcoxzph(zph_cont,var=c("OPTION","LTV","DTI"),  resid=FALSE,se=TRUE, title=FALSE, ggtheme=theme_light())
+ggcoxzph(zph_cont,var=c("VOL.CAT150,000$-300,000$","VOL.CAT>300,000$"),  resid=FALSE,se=TRUE, title=FALSE, ggtheme=theme_light())
 
-ggcoxzph(zph_cont,var=c("OPTION","VOL.CAT<150,000$","LTV","DTI"),  resid=FALSE,se=TRUE, title=FALSE)
+
+## visualize the results of time-dependce above
+fit_cont.VOL<-survfit(coxph(Surv(START,STOP,PREPAID)~OPTION+CSCORE+LTV+OCC_STAT+DTI+strata(VOL.CAT)+UNEMP+YEAR, data=FNMA))
+ggsurvplot(fit_cont.VOL, data=FNMA)
+
+## survival rates have a different Steigung
+fit2.table <- summary(fit_cont.VOL)
+fit2.table<- as.data.table(cbind(fit2.table$time,fit2.table$n.risk,fit2.table$n.event,fit1.table$n.censor,fit2.table$surv,fit2.table$strata))
+colnames(fit2.table) <- c("time","N.risk","N.event","SurvivalProb","Strata")
+fit2.table$SMM <- fit2.table$N.event/fit2.table$N.risk
+fit2.table$CPR <- 1-(1-fit2.table$SMM)^12
+
+ggplot(fit2.table, aes(x=time, y=CPR, group=Strata)) +
+  geom_line(aes(color=Strata))+
+  theme_light()
+## CPR rates make it clear. CPR drives faster the higher the credit volume. check with the graphics
+
+
+
+
+
 
 ## PH Assumptions are tough violated. As you can see OPTION shows that for the pure interest-driven incentive, this assumption
 ggcoxzph(zph_cont,var=c("OPTION","LTV","VOL.CAT>200000"),  resid=FALSE,se=TRUE)
