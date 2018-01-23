@@ -1,14 +1,15 @@
-SMM <- function(fit)
+SMM <- function(fit.table)
 {
-  fit1.table <- summary(fit)
-  fit1.table<- as.data.table(cbind(fit1.table$time,fit1.table$n.risk,fit1.table$n.event,fit1.table$surv,fit1.table$std.err,fit1.table$upper,fit1.table$lower,fit1.table$strata))
-  if(ncol(fit1.table) < 8) {
-    colnames(fit1.table) <- c("time","N.risk","N.event","SurvivalProb","std.err","upper","lower")
+  fit.table <- summary(fit.table)
+  fit.table<- as.data.table(cbind(fit.table$time,fit.table$n.risk,fit.table$n.event,fit.table$surv,fit.table$std.err,fit.table$upper,fit.table$lower,fit.table$strata))
+  if(ncol(fit.table) < 8) {
+    colnames(fit.table) <- c("Month","N.risk","N.event","SurvivalProb","std.err","upper","lower")
   } else {
-    colnames(fit1.table) <- c("time","N.risk","N.event","SurvivalProb","std.err","upper","lower","Strata")}
-  fit1.table$SMM <- fit1.table$N.event/fit1.table$N.risk
-  fit1.table$CPR <- 1-(1-fit1.table$SMM)^12
-  return(fit1.table)
+    colnames(fit.table) <- c("Month","N.risk","N.event","SurvivalProb","std.err","upper","lower","Strata")
+    fit.table$Strata <- as.factor(fit.table$Strata)}
+  fit.table$SMM <- fit.table$N.event/fit.table$N.risk
+  fit.table$CPR <- 1-(1-fit.table$SMM)^12
+  return(fit.table)
   
 }
 
